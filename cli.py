@@ -12,7 +12,7 @@ def run(product, filename):
             url,
             json={
                 "products": [product],
-                "zip": str(urlsafe_b64encode(f.read())),
+                "zip": urlsafe_b64encode(f.read()).decode("ascii"),
             },
         )
     r.raise_for_status()
