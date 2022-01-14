@@ -1,11 +1,27 @@
+import click
 import requests
-import sys
 import time
 from base64 import urlsafe_b64encode
 
 url = "https://wowless.dev/api/v1/run"
 
 
+@click.command()
+@click.option(
+    "--product",
+    "-p",
+    type=click.Choice(
+        [
+            "wow",
+            "wowt",
+            "wow_classic",
+            "wow_classic_ptr",
+            "wow_classic_era",
+            "wow_classic_era_ptr",
+        ]
+    ),
+)
+@click.argument("filename")
 def run(product, filename):
     with open(filename, "rb") as f:
         r = requests.post(
@@ -32,4 +48,4 @@ def run(product, filename):
 
 
 if __name__ == "__main__":
-    run("wow_classic_era", sys.argv[1])
+    run()
