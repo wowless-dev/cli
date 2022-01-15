@@ -24,12 +24,14 @@ url = "https://wowless.dev/api/v1/run"
         ]
     ),
 )
+@click.option("--loglevel", "-l", default=0)
 @click.argument("filename")
-def run(product, filename):
+def run(product, loglevel, filename):
     with open(filename, "rb") as f:
         r = requests.post(
             url,
             json={
+                "loglevel": loglevel,
                 "products": [product],
                 "zip": urlsafe_b64encode(f.read()).decode("ascii"),
             },
