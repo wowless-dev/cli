@@ -10,6 +10,7 @@ url = "https://wowless.dev/api/v1/run"
 @click.option(
     "--product",
     "-p",
+    required=True,
     type=click.Choice(
         [
             "wow",
