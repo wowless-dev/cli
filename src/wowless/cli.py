@@ -1,7 +1,9 @@
 import click
+from progress.spinner import Spinner
 import requests
 import time
 from base64 import urlsafe_b64encode
+import sys
 
 url = "https://wowless.dev/api/v1/run"
 
@@ -34,18 +36,21 @@ def run(product, filename):
         )
     r.raise_for_status()
     runid = r.json()[product]
-    wait = 5.0
-    for i in range(50):
+    wait = 1.0
+    for _ in Spinner(f"waiting for runid {runid} to complete... ").iter(
+        range(400)
+    ):
         wait = wait * 1.1
         time.sleep(wait)
         r = requests.get(url, params={"runid": runid})
         r.raise_for_status()
-        logs = r.json()["rawlogs"]
-        if logs:
-            for k, v in logs.items():
+        j = r.json()
+        if "status" in j and j["status"] == "done":
+            for k, v in j["rawlogs"].items():
                 print(k)
-                print(v)
+                print(v, end="")
             return
+    print("task never finished", file=sys.stderr)
 
 
 if __name__ == "__main__":
