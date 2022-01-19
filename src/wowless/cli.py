@@ -8,7 +8,17 @@ import sys
 url = "https://wowless.dev/api/v1/run"
 
 
-@click.command()
+@click.group()
+def wowless():
+    pass
+
+
+@wowless.group()
+def alpha():
+    pass
+
+
+@alpha.command()
 @click.option(
     "--product",
     "-p",
@@ -25,17 +35,16 @@ url = "https://wowless.dev/api/v1/run"
     ),
 )
 @click.option("--loglevel", "-l", default=0)
-@click.argument("filename")
-def run(product, loglevel, filename):
-    with open(filename, "rb") as f:
-        r = requests.post(
-            url,
-            json={
-                "loglevel": loglevel,
-                "products": [product],
-                "zip": urlsafe_b64encode(f.read()).decode("ascii"),
-            },
-        )
+@click.argument("zip", type=click.File("rb"))
+def run(product, loglevel, zip):
+    r = requests.post(
+        url,
+        json={
+            "loglevel": loglevel,
+            "products": [product],
+            "zip": urlsafe_b64encode(zip.read()).decode("ascii"),
+        },
+    )
     r.raise_for_status()
     runid = r.json()[product]
     wait = 1.0
@@ -56,4 +65,4 @@ def run(product, loglevel, filename):
 
 
 if __name__ == "__main__":
-    run()
+    wowless()
