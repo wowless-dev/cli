@@ -9,6 +9,7 @@ url = "https://wowless.dev/api/v1/run"
 
 
 @click.group()
+@click.version_option(package_name="wowless-cli")
 def wowless():
     pass
 
