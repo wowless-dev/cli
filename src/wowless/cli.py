@@ -58,9 +58,12 @@ def run(product, loglevel, zip):
         r.raise_for_status()
         j = r.json()
         if "status" in j and j["status"] == "done":
-            for k, v in j["rawlogs"].items():
+            for k, v in j["rawlogurls"].items():
+                r = requests.get(v, stream=True)
+                r.raise_for_status()
                 print(k)
-                print(v, end="")
+                for line in r.iter_lines(decode_unicode=True):
+                    print(line)
             return
     print("task never finished", file=sys.stderr)
 
