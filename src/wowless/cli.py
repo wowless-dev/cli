@@ -2,7 +2,6 @@ import click
 from progress.spinner import Spinner
 import requests
 import time
-from base64 import urlsafe_b64encode
 import sys
 
 url = "https://wowless.dev/api/v1/run"
@@ -38,16 +37,29 @@ def alpha():
 @click.option("--loglevel", "-l", default=0)
 @click.argument("zip", type=click.File("rb"))
 def run(product, loglevel, zip):
+    # Step 1: Get a runid and an upload URL.
+    r = requests.put(url, json={"product": product})
+    r.raise_for_status()
+    runid, uploadurl = r.json()["runid"], r.json()["url"]
+
+    # Step 2: Upload the addon zip.
+    requests.put(
+        uploadurl, headers={"Content-Type": "application/zip"}, data=zip
+    ).raise_for_status()
+
+    # Step 3: Queue the wowless run.
     r = requests.post(
         url,
         json={
             "loglevel": loglevel,
             "products": [product],
-            "zip": urlsafe_b64encode(zip.read()).decode("ascii"),
+            "runid": runid,
         },
     )
     r.raise_for_status()
     runid = r.json()[product]
+
+    # Step 4: Poll for wowless run completion.
     wait = 1.0
     for _ in Spinner(f"waiting for runid {runid} to complete... ").iter(
         range(400)
